@@ -82,7 +82,7 @@
         const d_t_left = [45, 180];
         const d_t_right = [315, 180];
         const d_b_left = [0, 135];
-        const d_b_right = [235, 0];
+        const d_b_right = [225, 0];
         const h = [90, 270];
         const v = [0, 180];
         const none = [225, 225];
@@ -155,10 +155,10 @@
             return [
               [t_left, h, h, t_right],
               [b_left, h, t_right, v],
-              [none, none, v, v],
-              [none, none, v, v],
-              [none, none, v, v],
-              [none, none, b_left, b_right],
+              [none, none, d_b_right, d_b_right],
+              [none, d_t_left, d_t_left, none],
+              [none, v, v, none],
+              [none, b_left, b_right, none],
             ];
           case "8":
             return [
