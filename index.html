@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Clock</title>
+    <link
+      href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABmJLR0T///////8JWPfcAAAACXBIWXMAAABIAAAASABGyWs+AAAAF0lEQVRIx2NgGAWjYBSMglEwCkbBSAcACBAAAeaR9cIAAAAASUVORK5CYII="
+      rel="icon"
+      type="image/x-icon"
+    />
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        padding: 0;
+        margin: 0;
+      }
+
+      html {
+        background-color: white;
+      }
+
+      #container {
+        display: grid;
+        grid-template-columns: repeat(8, auto);
+        grid-template-rows: repeat(12, auto);
+        padding: 20px;
+        width: fit-content;
+        top: 50%;
+        left: 50%;
+        position: absolute;
+        transform: translate(-50%, -50%);
+      }
+
+      .clock {
+        width: 70px;
+        height: 70px;
+        background-color: white;
+        border-radius: 50%;
+        position: relative;
+        box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      .clock::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 56px;
+        height: 56px;
+        background: white;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .hand1,
+      .hand2 {
+        position: absolute;
+        background-color: #181818;
+        border-radius: 2px;
+        width: 5px;
+        height: 25px;
+        top: 50%;
+        left: 50%;
+        transform-origin: bottom center;
+        transform: translateX(-50%) translateY(-100%);
+        transition: transform 5s ease-in-out;
+      }
+    </style>
+    <script>
+      const ROWS = 12;
+      const COLS = 8;
+      let rotations = [];
+      let clocks = [];
+
+      function numberToPattern(n) {
+        const t_left = [90, 180];
+        const t_right = [270, 180];
+        const b_left = [0, 90];
+        const b_right = [270, 0];
+        const d_t_left = [45, 180];
+        const d_t_right = [315, 180];
+        const d_b_left = [0, 135];
+        const d_b_right = [235, 0];
+        const h = [90, 270];
+        const v = [0, 180];
+        const none = [225, 225];
+
+        switch (n) {
+          case "0":
+            return [
+              [t_left, h, h, t_right],
+              [v, t_left, t_right, v],
+              [v, v, v, v],
+              [v, v, v, v],
+              [v, b_left, b_right, v],
+              [b_left, h, h, b_right],
+            ];
+          case "1":
+            return [
+              [t_left, h, t_right, none],
+              [b_left, t_right, v, none],
+              [none, v, v, none],
+              [none, v, v, none],
+              [t_left, b_right, b_left, t_right],
+              [b_left, h, h, b_right],
+            ];
+          case "2":
+            return [
+              [t_left, h, h, t_right],
+              [b_left, h, t_right, v],
+              [t_left, h, b_right, v],
+              [v, t_left, h, b_right],
+              [v, b_left, h, t_right],
+              [b_left, h, h, b_right],
+            ];
+          case "3":
+            return [
+              [t_left, h, h, t_right],
+              [b_left, h, t_right, v],
+              [t_left, h, b_right, v],
+              [b_left, h, t_right, v],
+              [t_left, h, b_right, v],
+              [b_left, h, h, b_right],
+            ];
+          case "4":
+            return [
+              [t_left, t_right, t_left, t_right],
+              [v, v, v, v],
+              [v, b_left, b_right, v],
+              [b_left, h, t_right, v],
+              [none, none, v, v],
+              [none, none, b_left, b_right],
+            ];
+          case "5":
+            return [
+              [t_left, h, h, t_right],
+              [v, t_left, h, b_right],
+              [v, b_left, h, t_right],
+              [b_left, h, t_right, v],
+              [t_left, h, b_right, v],
+              [b_left, h, h, b_right],
+            ];
+          case "6":
+            return [
+              [t_left, h, h, t_right],
+              [v, t_left, h, b_right],
+              [v, b_left, h, t_right],
+              [v, t_left, t_right, v],
+              [v, b_left, b_right, v],
+              [b_left, h, h, b_right],
+            ];
+          case "7":
+            return [
+              [t_left, h, h, t_right],
+              [b_left, h, t_right, v],
+              [none, none, v, v],
+              [none, none, v, v],
+              [none, none, v, v],
+              [none, none, b_left, b_right],
+            ];
+          case "8":
+            return [
+              [t_left, h, h, t_right],
+              [v, t_left, t_right, v],
+              [d_b_left, b_left, b_right, d_b_right],
+              [d_t_left, t_left, t_right, d_t_right],
+              [v, b_left, b_right, v],
+              [b_left, h, h, b_right],
+            ];
+          case "9":
+            return [
+              [t_left, h, h, t_right],
+              [v, t_left, t_right, v],
+              [v, b_left, b_right, v],
+              [b_left, h, t_right, v],
+              [t_left, h, b_right, v],
+              [b_left, h, h, b_right],
+            ];
+        }
+      }
+
+      function getRandom() {
+        return Math.random() * 360;
+      }
+
+      function updateHandRotation(clockIndex, handIndex, rotation) {
+        const hand = clocks[clockIndex].children[handIndex];
+        hand.style.transform = `translateX(-50%) translateY(-100%) rotate(${rotation}deg)`;
+      }
+
+      function setRandomRotations() {
+        for (let i = 0; i < rotations.length; i++) {
+          rotations[i][0] = getRandom();
+          rotations[i][1] = getRandom();
+          updateHandRotation(i, 0, rotations[i][0]);
+          updateHandRotation(i, 1, rotations[i][1]);
+        }
+      }
+
+      function setRotations(nums) {
+        const WIDTH = 4;
+        const HEIGHT = 6;
+
+        for (let i = 0; i < rotations.length; i++) {
+          rotations[i][0] = getRandom();
+          rotations[i][1] = getRandom();
+          updateHandRotation(i, 0, rotations[i][0]);
+          updateHandRotation(i, 1, rotations[i][1]);
+        }
+
+        for (let numIndex = 0; numIndex < nums.length; numIndex++) {
+          for (
+            let digitIndex = 0;
+            digitIndex < nums[numIndex].length;
+            digitIndex++
+          ) {
+            const digit = nums[numIndex][digitIndex];
+            const pattern = numberToPattern(digit);
+
+            let startCol, startRow;
+
+            if (numIndex === 0) {
+              if (digitIndex === 0) {
+                startCol = 0;
+                startRow = 0;
+              } else {
+                startCol = 4;
+                startRow = 0;
+              }
+            } else {
+              if (digitIndex === 0) {
+                startCol = 0;
+                startRow = 6;
+              } else {
+                startCol = 4;
+                startRow = 6;
+              }
+            }
+
+            for (let i = 0; i < HEIGHT; i++) {
+              for (let j = 0; j < WIDTH; j++) {
+                const clockRow = startRow + i;
+                const clockCol = startCol + j;
+                const clockIndex = clockRow * COLS + clockCol;
+
+                if (
+                  clockIndex < rotations.length &&
+                  pattern[i] &&
+                  pattern[i][j]
+                ) {
+                  rotations[clockIndex][0] = pattern[i][j][0];
+                  rotations[clockIndex][1] = pattern[i][j][1];
+                  updateHandRotation(clockIndex, 0, rotations[clockIndex][0]);
+                  updateHandRotation(clockIndex, 1, rotations[clockIndex][1]);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      function updateTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+
+        setRotations([
+          [hours[0], hours[1]],
+          [minutes[0], minutes[1]],
+        ]);
+      }
+
+      function startRealTimeClock() {
+        updateTime();
+        setInterval(updateTime, 1000);
+      }
+
+      function setup() {
+        const container = document.getElementById("container");
+        for (let i = 0; i < ROWS; i++) {
+          for (let j = 0; j < COLS; j++) {
+            var clockBody = document.createElement("div");
+            clockBody.className = "clock";
+            var hand1 = document.createElement("div");
+            var hand2 = document.createElement("div");
+            hand1.className = "hand1";
+            hand2.className = "hand2";
+            clockBody.appendChild(hand1);
+            clockBody.appendChild(hand2);
+            container.appendChild(clockBody);
+            clocks.push(clockBody);
+            rotations.push([getRandom(), getRandom()]);
+
+            updateHandRotation(
+              clocks.length - 1,
+              0,
+              rotations[rotations.length - 1][0],
+            );
+            updateHandRotation(
+              clocks.length - 1,
+              1,
+              rotations[rotations.length - 1][1],
+            );
+          }
+        }
+      }
+
+      window.onload = () => {
+        setup();
+        startRealTimeClock();
+      };
+    </script>
+  </head>
+  <body>
+    <div id="container"></div>
+  </body>
+</html>
